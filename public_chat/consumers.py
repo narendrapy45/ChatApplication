@@ -18,8 +18,9 @@ User = get_user_model()
 # Example taken from:
 # https://github.com/andrewgodwin/channels-examples/blob/master/multichat/chat/consumers.py
 class PublicChatConsumer(AsyncJsonWebsocketConsumer):
-
+	
 	async def connect(self):
+		print('connected ')
 		"""
 		Called when the websocket is handshaking as part of initial connection.
 		"""

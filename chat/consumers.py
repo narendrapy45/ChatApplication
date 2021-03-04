@@ -114,7 +114,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		print("ChatConsumer: send_user_info_payload. ")
 
 
- 	async def display_progress_bar(self, is_displayed):
+	async def display_progress_bar(self, is_displayed):
 		"""
 		1. is_displayed = True
 			- Display the progress bar on UI

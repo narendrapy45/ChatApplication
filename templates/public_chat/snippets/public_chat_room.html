@@ -111,6 +111,7 @@ PUBLIC CHAT
 		var ws_path = ws_scheme + '://' + window.location.host + ":8001/public_chat/{{room_id}}/"; // production
 	{% endif %}
 	var public_chat_socket = new WebSocket(ws_path);
+	console.log("New web Socket..")
 
 	// Handle incoming messages
 	public_chat_socket.onmessage = function(message) {
