@@ -4,6 +4,10 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 import os
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from friendApp.models import FriendList
+
 
 class MyAccountManager(BaseUserManager):
 	def create_user(self, email, username, password=None):
@@ -71,3 +75,7 @@ class Account(AbstractBaseUser):
 	# Does this user have permission to view this app? (ALWAYS YES FOR SIMPLICITY)
 	def has_module_perms(self, app_label):
 		return True
+
+@receiver(post_save, sender=Account)
+def user_save(sender, instance, **kwargs):
+    FriendList.objects.get_or_create(user=instance)
