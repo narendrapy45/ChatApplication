@@ -15,12 +15,16 @@ DEBUG = False
 
 def private_chat_room_view(request, *args, **kwargs):
 	user = request.user
+	room_id = request.GET.get("room_id")
 
 	# Redirect them if not authenticated
 	if not user.is_authenticated:
 		return redirect("login")
 
 	context = {}
+	if room_id:
+		room = PrivateChatRoom.objects.get(pk=room_id)
+		context["room"] = room
 
 	# 1. Find all the rooms this user is a part of 
 	rooms1 = PrivateChatRoom.objects.filter(user1=user, is_active=True)
@@ -70,5 +74,10 @@ def create_or_return_private_chat(request, *args, **kwargs):
 	else:
 		payload['response'] = "You can't start a chat if you are not authenticated."
 	return HttpResponse(json.dumps(payload), content_type="application/json")
+
+
+
+
+
 
 

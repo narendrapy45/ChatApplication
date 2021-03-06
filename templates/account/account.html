@@ -73,7 +73,7 @@
 		  <div class="card-body">
 		  	<div class="d-flex flex-column justify-content-center p-4">
 		  		<div class="image-container mx-auto mb-4">
-		  			<img class="d-block border border-dark rounded-circle img-fluid mx-auto profile-image" alt="codingwithnarendra logo" id="id_profile_image" src="{% static 'codingwithnarendra/dummy_image.png'%}">
+		  			<img class="d-block border border-dark rounded-circle img-fluid mx-auto profile-image" alt="codingwithnarendra logo" id="id_profile_image" src="{{profile_image}}">
 		  		</div>
 		  		<p class="mt-4 mb-1 field-heading">Email</p>
 		  		{%  if is_self %}
@@ -190,7 +190,7 @@
 <script type="text/javascript">
 
 	// called from base_js.html
-	preloadImage("{{profile_image|safe}}", 'id_profile_image')
+	//preloadImage("{{profile_image|safe}}", 'id_profile_image')
 
 	function onFriendRequestSent(){
 		location.reload();
@@ -249,7 +249,7 @@
 {% include 'friend/snippets/decline_friend_request.html' %}
 {% include 'friend/snippets/cancel_friend_request.html' %}
 {% include 'friend/snippets/remove_friend.html' %}
-{#% include 'chat/create_or_return_private_chat.html' %#}
+{% include 'chat/snippets/create_or_return_private_chat.html' %}
 
 
 
