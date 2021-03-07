@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'friendApp',
     'public_chat',
     'chat',
+    'notification',
 ]
 
 MIDDLEWARE = [
