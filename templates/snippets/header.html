@@ -25,13 +25,13 @@
 		<div class="d-flex flex-row-reverse flex-grow-1">
 			<nav class="">
 				{% if request.user.is_authenticated %}
-					<div class="dropdown dropleft show p-2 justify-content-end">
+					<div class="dropdown dropleft show p-2">
 						<div class="d-flex flex-row">
 
-							<div class="btn-group dropleft float-right">
+							<div class="btn-group dropleft">
 								<div class="d-flex notifications-icon-container rounded-circle align-items-center mr-3" id="id_chat_notification_dropdown_toggle" data-toggle="dropdown">
-									<span id="id_chat_notifications_count" class="notify-badge "></span>
-									<span class="d-flex material-icons notifications-material-icon m-auto align-items-center ">chat</span>
+									<span id="id_chat_notifications_count" class="notify-badge"></span>
+									<span class="d-flex material-icons notifications-material-icon m-auto align-items-center">chat</span>
 									<div class="dropdown-menu scrollable-menu" aria-labelledby="id_chat_notification_dropdown_toggle" id="id_chat_notifications_container">
 									</div>
 								</div>
@@ -79,7 +79,7 @@
 				<div class="dropdown dropleft p-2 mt-2">
 					<div class="d-flex flex-row">
 						<div class="btn-group dropleft">
-							<img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{request.user.profile_image.url}}" alt="codingwitnarendra logo" width="40" height="40">
+							<img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{request.user.profile_image.url}}" alt="codingwithnarendra logo" width="40" height="40">
 							<div class="dropdown-menu" aria-labelledby="id_profile_links">
 								<a class="dropdown-item" href="{% url 'account:view' user_id=request.user.id %}">Account</a>
 							</div>
@@ -96,6 +96,41 @@
 	<!-- END SMALL SCREENS -->
 </div>
 
+<!-- Setup SOCKET for NOTIFICATIONS -->
+<script type="text/javascript">
+	// Correctly decide between ws:// and wss://
+	var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	// var ws_path = ws_scheme + '://' + window.location.host + ":8001/"; // PRODUCTION
+	var ws_path = ws_scheme + '://' + window.location.host + "/";
+	// console.log("Connecting to " + ws_path);
+	var notificationSocket = new WebSocket(ws_path);
+
+	// Handle incoming messages
+	notificationSocket.onmessage = function(message) {
+		console.log("Got notification websocket message.");
+		var data = JSON.parse(message.data);
+
+	}
+
+	notificationSocket.onclose = function(e) {
+		console.error('Notification Socket closed unexpectedly');
+	};
+
+	notificationSocket.onopen = function(e){
+		console.log("Notification Socket on open: " + e)
+	}
+
+	notificationSocket.onerror = function(e){
+		console.log('Notification Socket error', e)
+	}
+
+	if (notificationSocket.readyState == WebSocket.OPEN) {
+		console.log("Notification Socket OPEN complete.")
+	} 
+	else if (notificationSocket.readyState == WebSocket.CONNECTING){
+		console.log("Notification Socket connecting..")
+	}
+</script>
 
 <script type="text/javascript">
 	setupChatDropdownHeader()
