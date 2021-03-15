@@ -153,6 +153,7 @@
 	notificationSocket.onmessage = function(message) {
 		var data = JSON.parse(message.data);
 		console.log("Got notification websocket message. " + data.general_msg_type);
+		console.log("Got notification websocket message. " + data.chat_msg_type);
 
 		/*
 			GENERAL NOTIFICATIONS
@@ -190,6 +191,10 @@
 		// new 'chat' notifications data payload
 		if(data.chat_msg_type == 10){
 			handleChatNotificationsData(data['notifications'], data['new_page_number'])
+		}
+		// refreshed chat notifications
+		if(data.chat_msg_type == 13){
+			handleNewChatNotificationsData(data['notifications'])
 		}
 	}
 
@@ -232,7 +237,6 @@
 	    return false
 	}
 
-	
 
 </script>
 

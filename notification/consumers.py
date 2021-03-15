@@ -100,6 +100,12 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 				else:
 					payload = json.loads(payload)
 					await self.send_chat_notifications_payload(payload['notifications'], payload['new_page_number'])
+		
+			elif command == "get_new_chat_notifications":
+				payload = await get_new_chat_notifications(self.scope["user"], content.get("newest_timestamp", None))
+				if payload != None:
+					payload = json.loads(payload)
+					await self.send_new_chat_notifications_payload(payload['notifications'])
 		except ClientError as e:
 			print("EXCEPTION: receive_json: " + str(e))
 			pass
@@ -211,6 +217,17 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 			},
 		)
 
+	async def send_new_chat_notifications_payload(self, notifications):
+		"""
+		Called by receive_json when ready to send a json array of the notifications
+		"""
+		await self.send_json(
+			{
+				"chat_msg_type": CHAT_MSG_TYPE_GET_NEW_NOTIFICATIONS,
+				"notifications": notifications,
+			},
+		)
+
 
 
 @database_sync_to_async
@@ -264,7 +281,7 @@ def accept_friend_request(user, notification_id):
                 payload['notification'] = s.serialize([updated_notification])[0]
                 return json.dumps(payload)
         except Notification.DoesNotExist:
-            raise ClientError("AUTH_ERROR", "An error occurred with that notification. Try refreshing the browser.")
+            raise ClientError("UNKNOWN_ERROR", "An error occurred with that notification. Try refreshing the browser.")
     return None
 
 
@@ -288,7 +305,7 @@ def decline_friend_request(user, notification_id):
 				payload['notification'] = s.serialize([updated_notification])[0]
 				return json.dumps(payload)
 		except Notification.DoesNotExist:
-			raise ClientError("AUTH_ERROR", "An error occurred with that notification. Try refreshing the browser.")
+			raise ClientError("UNKNOWN_ERROR", "An error occurred with that notification. Try refreshing the browser.")
 	return None
 
 
@@ -406,7 +423,24 @@ def get_chat_notifications(user, page_number):
 	
 
 
+@database_sync_to_async
+def get_new_chat_notifications(user, newest_timestatmp):
+	"""
+	Retrieve any notifications newer than the newest_timestatmp on the screen.
+	"""
+	payload = {}
+	if user.is_authenticated:
+		timestamp = newest_timestatmp[0:newest_timestatmp.find("+")] # remove timezone because who cares
+		timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
+		chatmessage_ct = ContentType.objects.get_for_model(UnreadChatRoomMessages)
+		notifications = Notification.objects.filter(target=user, content_type__in=[chatmessage_ct], timestamp__gt=timestamp).order_by('-timestamp')
+		s = LazyNotificationEncoder()
+		payload['notifications'] = s.serialize(notifications)
+		return json.dumps(payload) 
+	else:
+		raise ClientError("AUTH_ERROR", "User must be authenticated to get notifications.")
 
+	return None
 
 
 
