@@ -96,7 +96,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 			elif command == "get_chat_notifications":
 				payload = await get_chat_notifications(self.scope["user"], content.get("page_number", None))
 				if payload == None:
-					pass
+					await self.chat_pagination_exhausted()
 				else:
 					payload = json.loads(payload)
 					await self.send_chat_notifications_payload(payload['notifications'], payload['new_page_number'])
@@ -228,6 +228,17 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 			},
 		)
 
+	async def chat_pagination_exhausted(self):
+		"""
+		Called by receive_json when pagination is exhausted for chat notifications
+		"""
+		print("Chat Pagination DONE... No more notifications.")
+		await self.send_json(
+			{
+				"chat_msg_type": CHAT_MSG_TYPE_PAGINATION_EXHAUSTED,
+			},
+		)
+
 
 
 @database_sync_to_async
@@ -281,7 +292,7 @@ def accept_friend_request(user, notification_id):
                 payload['notification'] = s.serialize([updated_notification])[0]
                 return json.dumps(payload)
         except Notification.DoesNotExist:
-            raise ClientError("UNKNOWN_ERROR", "An error occurred with that notification. Try refreshing the browser.")
+            raise ClientError("AUTH_ERROR", "An error occurred with that notification. Try refreshing the browser.")
     return None
 
 
@@ -305,7 +316,7 @@ def decline_friend_request(user, notification_id):
 				payload['notification'] = s.serialize([updated_notification])[0]
 				return json.dumps(payload)
 		except Notification.DoesNotExist:
-			raise ClientError("UNKNOWN_ERROR", "An error occurred with that notification. Try refreshing the browser.")
+			raise ClientError("AUTH_ERROR", "An error occurred with that notification. Try refreshing the browser.")
 	return None
 
 
@@ -406,6 +417,7 @@ def get_chat_notifications(user, page_number):
 
 		# sleep 1s for testing
 		# sleep(1)  
+		print("PAGES: " + str(p.num_pages))
 		payload = {}
 		if len(notifications) > 0:
 			if int(page_number) <= p.num_pages:
